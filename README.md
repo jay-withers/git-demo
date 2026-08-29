@@ -10,7 +10,7 @@ commit.
 
 This repo also has **git hooks** already switched on via the
 [pre-commit framework](https://pre-commit.com/), so some of your commits
-will get checked — and occasionally rejected. That's deliberate. Section 6
+will get checked — and occasionally rejected. That's deliberate. Section 7
 and [HOOKS.md](HOOKS.md) explain how it all works; until then, just note
 when it happens.
 
@@ -19,7 +19,7 @@ when it happens.
 Do these **before** you start — the last step downloads a few hundred MB
 and you don't want to sit watching it.
 
-### 1. Git
+### Git
 
 ```sh
 git --version
@@ -31,9 +31,9 @@ on a fresh Mac pops up a dialog offering to install them. Accept it, or
 run `xcode-select --install` yourself. Takes a few minutes.*
 
 *Apple's git is fine for everything here. If you'd rather have a newer
-one, `brew install git` after step 3.*
+one, `brew install git` once you've got Homebrew below.*
 
-### 2. Tell git who you are
+### Tell git who you are
 
 Every commit is permanently stamped with a name and email:
 
@@ -68,7 +68,7 @@ the older `master`:
 git config --global init.defaultBranch main
 ```
 
-### 3. Homebrew
+### Homebrew
 
 The standard package manager for macOS — the easiest way to get the
 remaining tool.
@@ -80,7 +80,7 @@ brew --version
 *Not installed? Follow the one-liner at <https://brew.sh>. It'll ask for
 your password and take a few minutes.*
 
-### 4. pre-commit
+### pre-commit
 
 This is what runs the repo's hooks.
 
@@ -100,7 +100,7 @@ ships a `python3` for the rest. Nothing for you to manage.
 *If you'd rather not use Homebrew, `pipx install pre-commit` works too —
 that route does expect a Python you've installed yourself.*
 
-## 0. Setup
+## 1. Setup
 
 Clone the repo and switch the hooks on:
 
@@ -118,7 +118,7 @@ afterwards, so it only happens once per machine.*
 Have a look around before changing anything:
 
 ```sh
-git log --oneline    # the history so far
+git log --oneline    # the history: who changed what, and why
 git status           # clean — nothing changed yet
 ```
 
@@ -126,7 +126,7 @@ git status           # clean — nothing changed yet
 open in a browser tab — it's useful to see the same commits show up there
 as we go.*
 
-## 1. The mental model
+## 2. The mental model
 
 *Three things to keep straight: the **working tree** (files on disk right
 now), the **staging area** (what you've told git to include in the next
@@ -146,17 +146,9 @@ git config --get user.email
 change anything. They only tell you where you are. When you're lost, they
 are always the right first move.*
 
-## 2. Your first commit
+## 3. Your first commit
 
-```sh
-git log
-git status            # clean — nothing changed yet
-```
-
-*`git log` is the history: who changed what, when, and why. Right now
-there's one commit — the files that were already here.*
-
-Now make a change and watch it appear:
+Make a change and watch git notice:
 
 ```sh
 echo "- my first change" >> notes.md
@@ -181,7 +173,7 @@ git commit -m "my first commit"
 
 *→ **blocked.** One of this repo's hooks read the commit message and
 rejected it. It wants the form `type: description`, so that the history
-stays skimmable later. Section 6 covers where that rule comes from; for
+stays skimmable later. Section 7 covers where that rule comes from; for
 now, just give it what it wants:*
 
 ```sh
@@ -191,7 +183,7 @@ git log --oneline
 
 *Note what scrolled past — a list of checks, all passing. That's the hooks.*
 
-## 3. Staged vs unstaged
+## 4. Staged vs unstaged
 
 ```sh
 echo "- and another" >> notes.md
@@ -210,7 +202,7 @@ That's the clearest way to see the staging area is a real, separate place.*
 ```sh
 printf 'a line with trailing spaces   \n' >> notes.md
 git add notes.md
-git commit -m "docs: add another line"
+git commit -m "docs: add a messy line"
 ```
 
 *→ **blocked**, but look: `files were modified by this hook`. It didn't
@@ -220,15 +212,14 @@ sitting in your working tree — you just have to stage it and go again:*
 ```sh
 git diff              # the hook's own fix, unstaged
 git add notes.md
-git commit -m "docs: add another line"
+git commit -m "docs: add a messy line"
 ```
 
-## 4. Branching & merging
+## 5. Branching & merging
 
-*Worth showing first, since it makes "a branch is a pointer" concrete: in
-a repo with **no** commits, `git branch foo` fails with `not a valid
-object name` — there's no commit for the pointer to point at. We have
-commits now, so:*
+*One thing that makes "a branch is a pointer" concrete: in a repo with
+**no** commits, `git branch foo` fails with `not a valid object name` —
+there's no commit for the pointer to point at. We have commits, so:*
 
 ```sh
 git switch -c feature/greeting
@@ -260,7 +251,7 @@ git status
 cat notes.md
 ```
 
-Now demo the conflict-marker hook — try committing without resolving:
+Try committing without resolving it:
 
 ```sh
 git add notes.md
@@ -283,26 +274,26 @@ git log --oneline --graph --all
 *See the two lines joining back up — that's a merge commit, the only kind
 with two parents.*
 
-## 5. Remotes
+## 6. Remotes
 
-*Everything so far has been entirely on this laptop — no internet
-involved. A **remote** is just another copy of the repo somewhere else.
-GitHub is, at heart, exactly that: a git repo that lives somewhere
-everyone can reach.*
+*Every commit you've made so far exists only on this laptop. Cloning
+pulled the history down, but nothing has gone back the other way. A
+**remote** is just another copy of the repo somewhere else — GitHub is, at
+heart, exactly that.*
 
 ```sh
-git remote -v         # already pointing at GitHub
+git remote -v         # "origin" — where you cloned from
 git status            # "ahead of origin/main by N commits"
 ```
 
-*That "ahead by N" is git telling you those commits exist only here. Show
-them the GitHub page — the new commits aren't there yet.*
+*That "ahead by N" is git telling you those commits exist only here. Open
+the GitHub page and you won't find them.*
 
 ```sh
 git push
 ```
 
-*Refresh the GitHub page. Now they are. That's the whole idea: commit
+*Refresh the GitHub page — there they are. That's the whole idea: commit
 locally as often as you like, push when you want to share.*
 
 Now let's see what a teammate gets. Clone it into a different folder —
@@ -313,15 +304,15 @@ git clone https://github.com/jay-withers/git-demo /tmp/git-demo-clone
 cd /tmp/git-demo-clone
 git log --oneline --graph        # the full history came with it
 ls .git/hooks/ | grep -v sample  # ...but no hooks are active here!
-cd /Users/jay/Git/Me/git-demo
+cd -                             # back to your clone
 ```
 
 *Important detail: the clone has the hook **config** (it's a tracked file)
 but the hooks aren't running there — anything inside `.git/` never
-travels. That's why section 0 had you run `pre-commit install`, and why
+travels. That is why section 1 had you run `pre-commit install`, and why
 anyone joining a project has to do the same. Which brings us to...*
 
-## 6. The hooks
+## 7. The hooks
 
 Those checks that kept interrupting you — here's what they are.
 
@@ -365,7 +356,7 @@ check is the entire reason a lot of teams adopt this.*
 git reset creds.txt && rm creds.txt
 ```
 
-Then the escape hatches, so they know hooks aren't a prison:
+Hooks aren't a prison, though. The escape hatches:
 
 ```sh
 pre-commit run --all-files          # run everything over the whole repo
@@ -373,30 +364,34 @@ SKIP=gitleaks git commit -m "..."   # skip one hook
 git commit --no-verify -m "..."     # skip all of them
 ```
 
-*Worth being honest here: `--no-verify` exists and is sometimes the right
+*Worth being clear: `--no-verify` exists and is sometimes the right
 call. Hooks are a fast feedback loop, not a security boundary — anything
 that really matters gets enforced again in CI, where nobody can skip it.*
 
-## Cleanup / resetting for a second run
+## Cleanup
 
-Remove the throwaway clone:
+Remove the throwaway clone from section 6:
 
 ```sh
 rm -rf /tmp/git-demo-clone
 ```
 
-To run the demo again from scratch, roll the repo back to just the
-scaffolding commit. `b972082` is the initial commit — check with
-`git log --oneline` that it's still the first one.
+Everything else you did lives in your own clone. To start over, delete it
+and clone again — nothing you did affects anyone else unless you pushed.
+
+### Resetting the shared repo (owner only)
+
+*Only relevant if you own this repo and want to run the walkthrough again
+from a clean history. It rewrites the published `main`, so don't do it
+while anyone else has a clone they care about.*
 
 ```sh
-cd /Users/jay/Git/Me/git-demo
-git checkout main
-git reset --hard b972082
-git branch -D feature/greeting 2>/dev/null
+git switch main
+git reset --hard b972082         # the initial scaffolding commit
+git branch -D feature/greeting
 git push --force-with-lease origin main
 ```
 
-*`reset --hard` throws away uncommitted work and any commits after that
-point — which is what you want here, but it's the one command in this
-runbook that genuinely destroys things. Don't demo it casually.*
+*`reset --hard` permanently discards uncommitted work and every commit
+after that point. It's the one genuinely destructive command on this page
+— check `git log --oneline` first, and be sure you mean it.*
