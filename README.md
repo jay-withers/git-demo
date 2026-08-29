@@ -14,35 +14,133 @@ will get checked — and occasionally rejected. That's deliberate. Section 6
 and [HOOKS.md](HOOKS.md) explain how it all works; until then, just note
 when it happens.
 
-## 0. Setup
+## Prerequisites (macOS)
+
+Do these **before** you start — the last step downloads a few hundred MB
+and you don't want to sit watching it.
+
+### 1. Git
 
 ```sh
-cd /Users/jay/Git/Me/git-demo
-git log --oneline                    # the history so far
-git status                           # clean — nothing changed yet
-pre-commit install --install-hooks   # switches the hooks on in this clone
+git --version
 ```
 
-*The hook environments are already downloaded and cached, so nothing
-stalls.*
+*If that prints a version, you're done. macOS doesn't ship git on its own
+— it comes with Apple's Command Line Tools, and running the command above
+on a fresh Mac pops up a dialog offering to install them. Accept it, or
+run `xcode-select --install` yourself. Takes a few minutes.*
+
+*Apple's git is fine for everything here. If you'd rather have a newer
+one, `brew install git` after step 3.*
+
+### 2. Tell git who you are
+
+Every commit is permanently stamped with a name and email:
+
+```sh
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+```
+
+*Don't skip this. Git won't stop you — if you haven't set them it quietly
+invents something from your computer's username and hostname (like
+`jay@Jays-MacBook-Pro.local`), warns once, and commits anyway. That junk
+address is then baked into the history for good, and fixing it afterwards
+means rewriting commits. Two seconds now saves that.*
+
+*`--global` means "for every repo on this machine" — you do this once,
+ever. Drop the flag inside a repo to override it just there (handy if you
+use a different address for work).*
+
+*Use the email tied to your GitHub account, otherwise GitHub won't
+connect your commits to your profile.*
+
+Check it took:
+
+```sh
+git config --global --list
+```
+
+While you're here, make new repos default to a `main` branch rather than
+the older `master`:
+
+```sh
+git config --global init.defaultBranch main
+```
+
+### 3. Homebrew
+
+The standard package manager for macOS — the easiest way to get the
+remaining tool.
+
+```sh
+brew --version
+```
+
+*Not installed? Follow the one-liner at <https://brew.sh>. It'll ask for
+your password and take a few minutes.*
+
+### 4. pre-commit
+
+This is what runs the repo's hooks.
+
+```sh
+brew install pre-commit
+pre-commit --version
+```
+
+**You do not need to install Python separately.** People often assume you
+do, because `pre-commit` is a Python tool and some of the hooks are Python
+too. But Homebrew installs its own Python alongside it, and macOS already
+ships a `python3` for the rest. Nothing for you to manage.
+
+*(You also don't need Go, despite one of the hooks being a Go program —
+`pre-commit` downloads a private copy of whatever each hook needs.)*
+
+*If you'd rather not use Homebrew, `pipx install pre-commit` works too —
+that route does expect a Python you've installed yourself.*
+
+## 0. Setup
+
+Clone the repo and switch the hooks on:
+
+```sh
+git clone https://github.com/jay-withers/git-demo
+cd git-demo
+pre-commit install --install-hooks
+```
+
+*That last command does two things: writes the hook scripts into this
+clone, and downloads an isolated environment for each one. **The first
+run takes a few minutes and pulls down a few hundred MB** — it's cached
+afterwards, so it only happens once per machine.*
+
+Have a look around before changing anything:
+
+```sh
+git log --oneline    # the history so far
+git status           # clean — nothing changed yet
+```
 
 *This repo lives at <https://github.com/jay-withers/git-demo>. Keep it
 open in a browser tab — it's useful to see the same commits show up there
 as we go.*
 
-## 1. Identity & concepts
+## 1. The mental model
+
+*Three things to keep straight: the **working tree** (files on disk right
+now), the **staging area** (what you've told git to include in the next
+commit), and the **history** (snapshots you've saved). Git makes you
+choose what goes in a commit — that's the staging area's whole job, and
+it's the part that trips people up most.*
+
+*Every commit is also stamped with the identity you set in the
+prerequisites. Confirm it's what you expect:*
 
 ```sh
 git config --get user.name
 git config --get user.email
 ```
-
-*A commit records who made it — that comes from this config.*
-
-*Three things to keep straight: the **working tree** (files on disk right
-now), the **staging area** (what you've told git to include in the next
-commit), and the **history** (snapshots you've saved). Git makes you
-choose what goes in a commit — that's the staging area's whole job.*
 
 *Also worth knowing up front: `git log`, `git status` and `git diff` never
 change anything. They only tell you where you are. When you're lost, they
