@@ -45,8 +45,12 @@ pre-commit install --install-hooks
 
 Until you do, the config sits there doing nothing. (You can prove this:
 clone the repo and check `.git/hooks/` — only `.sample` files.) Projects
-usually put that line in their README or a `make setup` target. If you
-don't have the tool yet: `brew install pre-commit` or `pipx install pre-commit`.
+usually put that line in their README or a `make setup` target.
+
+If you don't have the tool yet, see the
+[prerequisites](README.md#prerequisites-macos) — short version on macOS is
+`brew install pre-commit`, and you don't need to install Python or Go
+yourself even though the hooks are written in them.
 
 ## What's installed here
 
