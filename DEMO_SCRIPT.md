@@ -13,12 +13,17 @@ until step 6; the payoff is better once they've been bitten by one.
 
 ```sh
 cd /Users/jay/Git/Me/git-demo
-git log --oneline              # nothing — this repo is a blank slate
-pre-commit install --install-hooks   # should already be done; confirms hooks are live
+git log --oneline                    # one commit: the scaffolding
+git status                           # clean
+pre-commit install --install-hooks   # already done; just confirms hooks are live
 ```
 
 *The hook environments are already downloaded and cached, so nothing will
 stall mid-demo.*
+
+*This repo lives at <https://github.com/jay-withers/git-demo>, so you can
+show the same commits in the GitHub UI as you go — useful for connecting
+"the thing I typed" to "the thing they've seen in a browser".*
 
 ## 1. Identity & concepts
 
@@ -37,42 +42,58 @@ choose what goes in a commit — that's the staging area's whole job.*
 *One heads-up: this repo has some automated checks wired into git itself.
 You'll see them fire. We'll dig into them at the end.*
 
-## 2. First commit
+## 2. Your first commit
 
 ```sh
+git log
+git status            # clean — nothing changed yet
+```
+
+*`git log` is the history: who changed what, when, and why. Right now
+there's one commit — the files that were already here.*
+
+Now make a change and watch it appear:
+
+```sh
+echo "- a line my mate added" >> notes.md
 git status
 ```
 
-*Everything's untracked — git doesn't know about any of it yet.*
+*`notes.md` is now **modified**. Git noticed, but hasn't recorded
+anything — nothing is saved until you commit.*
+
+```sh
+git diff              # exactly what changed
+git add notes.md      # stage it: "this goes in the next commit"
+git status            # now it's staged, not just modified
+```
 
 Let the commit-message hook bite (this is the hook teaser):
 
 ```sh
-git add .
-git commit -m "first commit"
+git commit -m "my first commit"
 ```
 
 *→ **blocked.** Something checked the commit message and didn't like it.
-Park that thought. It wants a `type: description` format:*
+Park that thought — we'll come back to it. It wants a `type: description`
+format:*
 
 ```sh
-git commit -m "feat: initial demo files"
-git log
+git commit -m "docs: add a line to notes"
+git log --oneline
 ```
 
 *Note what scrolled past — a list of checks, all passing. That's the hooks.*
 
-## 3. Change → diff → commit
+## 3. Staged vs unstaged
 
 ```sh
-echo "- a second line" >> notes.md
-git status
-git diff
+echo "- and another" >> notes.md
+git diff              # unstaged changes
 git add notes.md
 git diff              # empty now — it's staged
 git diff --cached     # there it is
-git commit -m "docs: add a second line to notes"
-git log --oneline
+git commit -m "docs: add another line"
 ```
 
 *`git diff` shows unstaged changes; `git diff --cached` shows staged ones.
@@ -97,6 +118,11 @@ git commit -m "docs: add another line"
 ```
 
 ## 4. Branching & merging
+
+*Worth showing first, since it makes "a branch is a pointer" concrete: in
+a repo with **no** commits, `git branch foo` fails with `not a valid
+object name` — there's no commit for the pointer to point at. We have
+commits now, so:*
 
 ```sh
 git switch -c feature/greeting
@@ -153,19 +179,31 @@ with two parents.*
 
 ## 5. Remotes
 
-*GitHub is, at heart, just a git repo that lives somewhere everyone can
-reach. Let's build a stand-in locally — no account needed.*
+*Everything so far has been entirely on this laptop — no internet
+involved. A **remote** is just another copy of the repo somewhere else.
+GitHub is, at heart, exactly that: a git repo that lives somewhere
+everyone can reach.*
 
 ```sh
-git init --bare /tmp/git-demo-remote.git
-git remote add origin /tmp/git-demo-remote.git
-git push -u origin main
+git remote -v         # already pointing at GitHub
+git status            # "ahead of origin/main by N commits"
 ```
 
-Now show what a teammate sees:
+*That "ahead by N" is git telling you those commits exist only here. Show
+them the GitHub page — the new commits aren't there yet.*
 
 ```sh
-git clone /tmp/git-demo-remote.git /tmp/git-demo-clone
+git push
+```
+
+*Refresh the GitHub page. Now they are. That's the whole idea: commit
+locally as often as you like, push when you want to share.*
+
+Now show what a teammate sees — have them clone it themselves if they've
+got git installed, or do it yourself in another folder:
+
+```sh
+git clone https://github.com/jay-withers/git-demo /tmp/git-demo-clone
 cd /tmp/git-demo-clone
 git log --oneline --graph        # the full history came with it
 ls .git/hooks/ | grep -v sample  # ...but no hooks are active here!
@@ -173,9 +211,9 @@ cd /Users/jay/Git/Me/git-demo
 ```
 
 *Important detail: the clone has the hook **config** (it's a tracked file)
-but the hooks aren't running — the bits that live inside `.git/` never
-travel. A teammate has to run `pre-commit install --install-hooks` once.
-That's the natural segue into...*
+but the hooks aren't running — anything inside `.git/` never travels. A
+teammate has to run `pre-commit install --install-hooks` once. That's the
+natural segue into...*
 
 ## 6. The hooks (open the hood)
 
@@ -229,16 +267,26 @@ git commit --no-verify -m "..."     # skip all of them
 call. Hooks are a fast feedback loop, not a security boundary — anything
 that really matters gets enforced again in CI, where nobody can skip it.*
 
-## Cleanup (after the demo)
+## Cleanup / resetting for a second run
+
+Remove the throwaway clone:
 
 ```sh
-rm -rf /tmp/git-demo-remote.git /tmp/git-demo-clone
+rm -rf /tmp/git-demo-clone
 ```
 
-To reset this repo to a blank slate and run the whole thing again:
+To run the demo again from scratch, roll the repo back to just the
+scaffolding commit. `b972082` is the initial commit — check with
+`git log --oneline` that it's still the first one.
 
 ```sh
 cd /Users/jay/Git/Me/git-demo
-rm -rf .git && git init -b main && pre-commit install --install-hooks
-git remote remove origin 2>/dev/null
+git checkout main
+git reset --hard b972082
+git branch -D feature/greeting 2>/dev/null
+git push --force-with-lease origin main
 ```
+
+*`reset --hard` throws away uncommitted work and any commits after that
+point — which is what you want here, but it's the one command in this
+runbook that genuinely destroys things. Don't demo it casually.*
