@@ -1,0 +1,44 @@
+# pre-commit configuration — see HOOKS.md for what this is and how to enable it.
+#
+# Every hook below comes from a published, version-pinned repo. The
+# `pre-commit` tool clones each repo, installs it in its own isolated
+# environment, and runs the listed hooks at the right git stage.
+#
+# Enable in a fresh clone with:
+#   pre-commit install --install-hooks
+
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+  # The standard starter set — small, fast, pure-Python checks that most
+  # projects using pre-commit start with.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # Tidy-ups: these FIX the file and abort the commit, so you re-stage
+      # and commit again. Good demo of a hook that edits your work.
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+      # Guards: these just block.
+      # Note: check-merge-conflict only fires while the repo is actually
+      # mid-merge, so it won't complain about docs that discuss the markers.
+      - id: check-merge-conflict
+      - id: check-added-large-files # default limit 500kB
+      - id: check-yaml # this config file has to parse, for a start
+      - id: detect-private-key
+
+  # Enforces Conventional Commits ("type: description") on the commit
+  # message. Runs at the commit-msg stage, which this repo's hook manifest
+  # declares for us.
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+
+  # Broad secret scanning across the staged changes — catches far more
+  # than detect-private-key above (API keys, cloud credentials, tokens).
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
