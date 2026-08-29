@@ -67,15 +67,14 @@ versions.
 
 The first seven run at the `pre-commit` stage (before the commit is
 created); the last runs at `commit-msg` (after you've typed the message).
-
-`gitleaks` reads its own [`.gitleaks.toml`](.gitleaks.toml), which extends
-the default ruleset with one narrow allowlist: this repo's demo script
-quotes a deliberately fake AWS key (because the demo shows gitleaks
-blocking one), and without the exception the doc describing the check
-would trip the check. Real repos need this too, for test fixtures and
-example config.
 `default_install_hook_types` in the config is what tells `pre-commit
 install` to wire up both stages.
+
+`gitleaks` reads its own [`.gitleaks.toml`](.gitleaks.toml), which extends
+the default ruleset with one narrow allowlist: this repo's README quotes a
+deliberately fake AWS key (because the walkthrough shows gitleaks blocking
+one), and without the exception the doc describing the check would trip
+the check. Real repos need this too, for test fixtures and example config.
 
 ## Useful commands
 

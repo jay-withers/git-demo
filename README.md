@@ -1,29 +1,34 @@
-# Git demo script
+# Learning git, by doing it
 
-A runbook for walking a git beginner through the basics, live. You type
-these; narrate what each command does before you run it. Talking points
-are in *italics*.
+A hands-on walkthrough of git for someone who's never used it. Work down
+this page a section at a time: run the commands, look at what git says
+back. Explanations are in *italics* under each block.
 
-This repo already has hooks wired up via the
-[pre-commit framework](https://pre-commit.com/) (see [HOOKS.md](HOOKS.md)) —
-your mate will feel them firing as you go. Don't explain them properly
-until step 6; the payoff is better once they've been bitten by one.
+By the end you'll have made commits, branched, hit a merge conflict and
+resolved it, pushed to GitHub, and seen automated checks block a bad
+commit.
 
-## 0. Before they sit down
+This repo also has **git hooks** already switched on via the
+[pre-commit framework](https://pre-commit.com/), so some of your commits
+will get checked — and occasionally rejected. That's deliberate. Section 6
+and [HOOKS.md](HOOKS.md) explain how it all works; until then, just note
+when it happens.
+
+## 0. Setup
 
 ```sh
 cd /Users/jay/Git/Me/git-demo
-git log --oneline                    # one commit: the scaffolding
-git status                           # clean
-pre-commit install --install-hooks   # already done; just confirms hooks are live
+git log --oneline                    # the history so far
+git status                           # clean — nothing changed yet
+pre-commit install --install-hooks   # switches the hooks on in this clone
 ```
 
-*The hook environments are already downloaded and cached, so nothing will
-stall mid-demo.*
+*The hook environments are already downloaded and cached, so nothing
+stalls.*
 
-*This repo lives at <https://github.com/jay-withers/git-demo>, so you can
-show the same commits in the GitHub UI as you go — useful for connecting
-"the thing I typed" to "the thing they've seen in a browser".*
+*This repo lives at <https://github.com/jay-withers/git-demo>. Keep it
+open in a browser tab — it's useful to see the same commits show up there
+as we go.*
 
 ## 1. Identity & concepts
 
@@ -39,8 +44,9 @@ now), the **staging area** (what you've told git to include in the next
 commit), and the **history** (snapshots you've saved). Git makes you
 choose what goes in a commit — that's the staging area's whole job.*
 
-*One heads-up: this repo has some automated checks wired into git itself.
-You'll see them fire. We'll dig into them at the end.*
+*Also worth knowing up front: `git log`, `git status` and `git diff` never
+change anything. They only tell you where you are. When you're lost, they
+are always the right first move.*
 
 ## 2. Your first commit
 
@@ -55,7 +61,7 @@ there's one commit — the files that were already here.*
 Now make a change and watch it appear:
 
 ```sh
-echo "- a line my mate added" >> notes.md
+echo "- my first change" >> notes.md
 git status
 ```
 
@@ -68,15 +74,17 @@ git add notes.md      # stage it: "this goes in the next commit"
 git status            # now it's staged, not just modified
 ```
 
-Let the commit-message hook bite (this is the hook teaser):
+Now commit it — but deliberately with a sloppy message, to meet the first
+hook:
 
 ```sh
 git commit -m "my first commit"
 ```
 
-*→ **blocked.** Something checked the commit message and didn't like it.
-Park that thought — we'll come back to it. It wants a `type: description`
-format:*
+*→ **blocked.** One of this repo's hooks read the commit message and
+rejected it. It wants the form `type: description`, so that the history
+stays skimmable later. Section 6 covers where that rule comes from; for
+now, just give it what it wants:*
 
 ```sh
 git commit -m "docs: add a line to notes"
@@ -199,8 +207,8 @@ git push
 *Refresh the GitHub page. Now they are. That's the whole idea: commit
 locally as often as you like, push when you want to share.*
 
-Now show what a teammate sees — have them clone it themselves if they've
-got git installed, or do it yourself in another folder:
+Now let's see what a teammate gets. Clone it into a different folder —
+this is exactly what anyone else on the project would do:
 
 ```sh
 git clone https://github.com/jay-withers/git-demo /tmp/git-demo-clone
@@ -211,36 +219,40 @@ cd /Users/jay/Git/Me/git-demo
 ```
 
 *Important detail: the clone has the hook **config** (it's a tracked file)
-but the hooks aren't running — anything inside `.git/` never travels. A
-teammate has to run `pre-commit install --install-hooks` once. That's the
-natural segue into...*
+but the hooks aren't running there — anything inside `.git/` never
+travels. That's why section 0 had you run `pre-commit install`, and why
+anyone joining a project has to do the same. Which brings us to...*
 
-## 6. The hooks (open the hood)
+## 6. The hooks
+
+Those checks that kept interrupting you — here's what they are.
 
 ```sh
-ls .git/hooks/            # git ships samples; none run by default
+ls .git/hooks/            # git ships samples; none of them run by default
 cat .pre-commit-config.yaml
 ```
 
-Walk through [HOOKS.md](HOOKS.md) together. The shape of it:
+The shape of it (see [HOOKS.md](HOOKS.md) for the full version):
 
-- A git hook is a script git runs at a set moment (before a commit, after
-  a message, before a push).
-- Hand-writing them in `.git/hooks/` is a pain: they're not shared, and
-  you'd be reinventing checks everyone needs.
+- A git hook is a script git runs at a set moment — before a commit is
+  created, after you type a message, before a push.
+- Hand-writing them in `.git/hooks/` is a pain: that directory is never
+  committed, so nobody else on the project gets your hooks, and you'd be
+  reinventing checks everyone needs.
 - So `pre-commit` reads a **tracked** config of published, version-pinned
-  hooks, installs each in its own environment, and wires up the shims.
+  hooks, installs each in its own environment, and writes the shims into
+  `.git/hooks/` for you.
 
-Everything they've already been bitten by, named:
+Which means every interruption so far now has a name:
 
 | What happened | Which hook |
 | --- | --- |
-| `"first commit"` rejected | `conventional-pre-commit` (commit-msg stage) |
+| `"my first commit"` rejected | `conventional-pre-commit` (commit-msg stage) |
 | trailing spaces fixed for you | `trailing-whitespace` |
 | conflict markers caught | `check-merge-conflict` |
 
-One they haven't seen yet — the secret scanner. This is usually the one
-that sells it:
+There's one more you haven't hit yet, and it's usually the one that sells
+the whole idea — the secret scanner:
 
 ```sh
 printf 'aws_access_key_id = AKIA4T7WZQ2JXKPLMN3R\n' > creds.txt

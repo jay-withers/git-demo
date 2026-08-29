@@ -1,9 +1,9 @@
 # gitleaks configuration.
 #
 # Start from gitleaks' full default ruleset, then add one narrow exception:
-# this repo's own documentation quotes a deliberately fake AWS key, because
-# the demo walks through gitleaks blocking exactly that. Without this
-# allowlist the docs describing the check would trip the check.
+# this repo's README quotes a deliberately fake AWS key, because the
+# walkthrough shows gitleaks blocking exactly that. Without this allowlist
+# the doc describing the check would trip the check.
 #
 # This is a normal thing to need in real repos too — test fixtures and
 # example config routinely contain fake-but-realistic credentials.
@@ -12,7 +12,7 @@
 useDefault = true
 
 [allowlist]
-description = "Demo docs quote a fake AWS key on purpose"
+description = "The walkthrough quotes a fake AWS key on purpose"
 paths = [
-  '''DEMO_SCRIPT\.md''',
+  '''README\.md''',
 ]
