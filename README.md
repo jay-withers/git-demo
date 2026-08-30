@@ -100,31 +100,91 @@ ships a `python3` for the rest. Nothing for you to manage.
 *If you'd rather not use Homebrew, `pipx install pre-commit` works too —
 that route does expect a Python you've installed yourself.*
 
-## 1. Setup
+## 1. Getting the repo onto your machine
 
-Clone the repo and switch the hooks on:
+This repo lives at <https://github.com/jay-withers/git-demo>. Open it in a
+browser tab now — it's useful to see the same commits show up there as we
+go. What you're looking at is the copy on GitHub; the next step makes you
+your own.
+
+### Pick somewhere to put it
+
+Clone into a folder you'll be able to find again. Anywhere in your home
+directory is fine:
+
+```sh
+mkdir -p ~/Projects
+cd ~/Projects
+```
+
+*`git clone` creates a **new folder** named after the repo, inside
+whatever directory you're sitting in — so run it from the parent, not from
+an empty folder you've already made for it. Otherwise you end up with
+`~/Projects/git-demo/git-demo`.*
+
+### Clone it
 
 ```sh
 git clone https://github.com/jay-withers/git-demo
-cd git-demo
-pre-commit install --install-hooks
 ```
 
-*That last command does two things: writes the hook scripts into this
-clone, and downloads an isolated environment for each one. **The first
-run takes a few minutes and pulls down a few hundred MB** — it's cached
-afterwards, so it only happens once per machine.*
+*You should see `Cloning into 'git-demo'...` and a few lines of counting
+objects. Because this repo is public you don't need a GitHub account or a
+password for this step — cloning over HTTPS just downloads it.*
 
-Have a look around before changing anything:
+*A clone is not a download of the current files. It's a **full copy of the
+repo**: every commit, every branch, the whole history, on your disk. That's
+why the rest of this walkthrough works offline — `git log`, `git diff`,
+branching, committing all happen locally, with no network involved.*
+
+Move into it:
+
+```sh
+cd git-demo
+ls -a
+```
+
+*Alongside the files you'd expect there's a `.git` directory. **That** is
+the repository — the history and all of git's bookkeeping. The visible
+files are just the version of them git currently has checked out for you.
+Delete `.git` and you're left with an ordinary folder; leave it alone and
+you can go back to any commit ever made.*
+
+### Look around before changing anything
 
 ```sh
 git log --oneline    # the history: who changed what, and why
 git status           # clean — nothing changed yet
+git remote -v        # "origin" — the GitHub URL you cloned from
 ```
 
-*This repo lives at <https://github.com/jay-withers/git-demo>. Keep it
-open in a browser tab — it's useful to see the same commits show up there
-as we go.*
+*`git status` saying `nothing to commit, working tree clean` means your
+files match the last commit exactly. `origin` is the name git
+automatically gave the place you cloned from — section 6 comes back to
+it.*
+
+### Switch the hooks on
+
+```sh
+pre-commit install --install-hooks
+```
+
+*This does two things: writes the hook scripts into this clone, and
+downloads an isolated environment for each one. **The first run takes a
+few minutes and pulls down a few hundred MB** — it's cached afterwards, so
+it only happens once per machine.*
+
+*You have to run this in every fresh clone. Section 6 shows why.*
+
+### One caveat about pushing
+
+*Everything up to section 6 is local, so you can follow along as-is. But
+`git push` needs write access to the repo you cloned, and you won't have
+it on someone else's. If you want section 6 to work, click **Fork** on the
+GitHub page first to get your own copy, and clone that URL instead —
+`https://github.com/YOUR-USERNAME/git-demo`. Pushing to your own fork also
+means GitHub will prompt you to log in the first time; a browser popup or
+a personal access token, depending on your setup.*
 
 ## 2. The mental model
 
