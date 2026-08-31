@@ -6,3 +6,4 @@ a line with trailing spaces
 Hello from main
 Hello from the feature branch
 Hello, again- my first change
+- and another
