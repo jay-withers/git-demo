@@ -445,9 +445,15 @@ and clone again — nothing you did affects anyone else unless you pushed.
 from a clean history. It rewrites the published `main`, so don't do it
 while anyone else has a clone they care about.*
 
+Find the last commit before the walkthrough ones: the newest commit in
+`git log --oneline` whose message ends in a PR number like `(#3)`. Every
+walkthrough commit comes after it. Don't go back further than that, or you
+lose this README too.
+
 ```sh
 git switch main
-git reset --hard b972082         # the initial scaffolding commit
+git log --oneline                # note the hash of that last (#N) commit
+git reset --hard <that hash>
 git branch -D feature/greeting
 git push --force-with-lease origin main
 ```
